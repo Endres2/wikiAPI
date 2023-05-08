@@ -27,7 +27,8 @@ const articleSchema = mongoose.Schema({
 
 const Article =  mongoose.model("Article",articleSchema);
 
-app.route("/articles").get(
+app.route("/articles")
+.get(
     (req,res)=>{
         Article.find({}).then((articles,err)=>{
             if(!err){
@@ -44,7 +45,8 @@ app.route("/articles").get(
         });
         
     }
-).post(
+)
+.post(
     (req,res)=>{
         const newArticle = new Article({
             title:req.body.title,
@@ -60,11 +62,82 @@ app.route("/articles").get(
             res.send(err)
         })
     }
-).delete(
+)
+.delete(
     (req,res)=>{
         Article.deleteMany({}).then( (err)=>{
             if(!err){
                 res.send("Sucessfully deleted all articles")
+            }else{
+                res.send(err)
+            }
+        }).catch((err)=>{
+            res.send(err)
+        })
+    }
+)
+
+app.route("/articles/:title")
+.get(
+    (req,res)=>{
+        Article.findOne({title:req.params.title}).then((article,err)=>{
+            if(article){
+                res.send(article)
+            }else{
+                res.send("No articles with that title were found")
+            }
+        
+        }).catch((err)=>{
+            console.log(err)
+            res.send(err)
+        });
+        
+    }
+)
+.put(
+    (req,res)=>{
+        Article.findOneAndUpdate(
+            {title:req.params.title},
+            {title:req.body.title, content:req.body.content},
+            {overwrite: true})
+            .then((doc,err)=>{
+            if(!err){
+                res.send("Sucessfully updated the article")
+            }else{
+                res.send("No articles were updated")
+            }
+        
+        }).catch((err)=>{
+            console.log(err)
+            res.send(err)
+        });
+        
+    }
+)
+.patch(
+    (req,res)=>{
+        Article.findOneAndUpdate(
+            {title:req.params.title},
+            {$set:req.body})
+            .then((doc,err)=>{
+            if(!err){
+                res.send("Sucessfully updated the article")
+            }else{
+                res.send("No articles were updated")
+            }
+        
+        }).catch((err)=>{
+            console.log(err)
+            res.send(err)
+        });
+        
+    }
+)
+.delete(
+    (req,res)=>{
+        Article.deleteOne({title:req.params.title}).then( (article,err)=>{
+            if(!err){
+                res.send("Sucessfully deleted one article")
             }else{
                 res.send(err)
             }
